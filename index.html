@@ -1,0 +1,275 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Counting Down to You</title>
+    
+    <!-- Load Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Load Inter font -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Dancing+Script:wght@700&family=Inter:wght@400;700;900&display=swap" rel="stylesheet">
+    
+    <style>
+        /* Apply the font and a custom sky/sunset gradient */
+        body {
+            font-family: 'Dancing Script', cursive;
+            /* A soft, romantic, sky-like gradient */
+            background: linear-gradient(135deg, #f5e0e0 0%, #d6e6f2 50%, #e0c3fc 100%);
+            overflow: hidden; /* Hide scrollbars due to floating elements */
+            position: relative; /* For positioning floating elements */
+        }
+        
+        /* Glassmorphism effect for the timer boxes */
+        .time-box {
+            font-family: 'Inter', sans-serif; /* Keep numbers readable */
+            background: rgba(255, 255, 255, 0.65);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px); /* For Safari */
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        /* Simple animation for the icon */
+        @keyframes pulse-heart {
+            0%, 100% {
+                transform: scale(1);
+            }
+            50% {
+                transform: scale(1.1);
+            }
+        }
+        
+        .icon-animate {
+            animation: pulse-heart 2s infinite ease-in-out;
+        }
+
+        /* --- Floating Elements --- */
+
+        /* Keyframes for floating around, fading in and out */
+        @keyframes floatAround {
+            0% {
+                opacity: 0;
+                transform: scale(0.5) rotate(0deg) translate(0, 0);
+            }
+            20% {
+                opacity: 1;
+            }
+            80% {
+                opacity: 1;
+            }
+            100% {
+                opacity: 0;
+                transform: scale(1.2) rotate(360deg) translate(var(--x-end), var(--y-end));
+            }
+        }
+
+        /* General style for floating items */
+        .floating-item {
+            position: absolute;
+            pointer-events: none; /* Make them unclickable */
+            animation: floatAround linear infinite;
+            z-index: 0; /* Keep floating items in the background */
+        }
+
+        /* Specific styles for hearts */
+        .floating-heart {
+            color: #ef4444; /* Red color for heart */
+            font-size: 2em; /* Default size */
+        }
+
+        /* Specific styles for planes */
+        .floating-plane {
+            color: #60a5fa; /* Blue color for plane */
+            font-size: 1.8em; /* Default size */
+            transform: rotate(45deg); /* Point plane upwards */
+        }
+    </style>
+</head>
+<body class="text-gray-800">
+
+    <!-- Main Container -->
+    <!-- Added relative z-10 to keep content above floating elements -->
+    <div class="min-h-screen flex flex-col items-center justify-center p-4 text-center relative z-10"> 
+
+        <!-- This div wraps the main countdown, it will be hidden when the timer ends -->
+        <div id="countdown-wrapper" class="w-full">
+            
+            <!-- Main Title -->
+            <h1 class="text-3xl sm:text-4xl md:text-5xl font-bold mb-3 bg-gradient-to-r from-pink-500 to-purple-600 bg-clip-text text-transparent">
+                La Bubu's Arrival
+            </h1>
+            
+            <!-- Subtitle with Target Date -->
+            <p class="text-lg md:text-xl text-gray-700 mb-10">
+                November 1, 2025 &bull; 5:20 PM Beirut Time
+            </p>
+            
+            <!-- Countdown Timer Boxes -->
+            <div id="countdown" class="flex flex-wrap justify-center gap-4 md:gap-8">
+                
+                <!-- Days -->
+                <div class="time-box rounded-2xl p-6 md:p-8 shadow-xl min-w-[100px] md:min-w-[140px]">
+                    <span id="days" class="block text-4xl md:text-6xl font-black bg-gradient-to-r from-pink-500 to-red-500 bg-clip-text text-transparent">00</span>
+                    <span class="block text-sm md:text-base uppercase tracking-widest text-gray-600 mt-1">Days</span>
+                </div>
+                
+                <!-- Hours -->
+                <div class="time-box rounded-2xl p-6 md:p-8 shadow-xl min-w-[100px] md:min-w-[140px]">
+                    <span id="hours" class="block text-4xl md:text-6xl font-black bg-gradient-to-r from-purple-500 to-indigo-500 bg-clip-text text-transparent">00</span>
+                    <span class="block text-sm md:text-base uppercase tracking-widest text-gray-600 mt-1">Hours</span>
+                </div>
+                
+                <!-- Minutes -->
+                <div class="time-box rounded-2xl p-6 md:p-8 shadow-xl min-w-[100px] md:min-w-[140px]">
+                    <span id="minutes" class="block text-4xl md:text-6xl font-black bg-gradient-to-r from-blue-500 to-cyan-500 bg-clip-text text-transparent">00</span>
+                    <span class="block text-sm md:text-base uppercase tracking-widest text-gray-600 mt-1">Minutes</span>
+                </div>
+                
+                <!-- Seconds -->
+                <div class="time-box rounded-2xl p-6 md:p-8 shadow-xl min-w-[100px] md:min-w-[140px]">
+                    <span id="seconds" class="block text-4xl md:text-6xl font-black bg-gradient-to-r from-teal-500 to-emerald-500 bg-clip-text text-transparent">00</span>
+                    <span class="block text-sm md:text-base uppercase tracking-widest text-gray-600 mt-1">Seconds</span>
+                </div>
+                
+            </div>
+        </div>
+
+        <!-- This message is hidden by default and appears when the countdown finishes -->
+        <div id="landed-message" class="hidden">
+            <h1 class="text-4xl sm:text-5xl md:text-6xl font-bold mb-6 bg-gradient-to-r from-pink-500 to-purple-600 bg-clip-text text-transparent">
+                Welcome Home!
+            </h1>
+            <p class="text-6xl md:text-7xl icon-animate">
+                ✈️ ❤️
+            </p>
+        </div>
+
+        <!-- Footer Message -->
+        <p id="footer-message" class="mt-12 text-2xl md:text-3xl font-medium text-gray-700">
+            See you at the gate!
+        </p>
+
+    </div>
+
+    <script>
+        // --- COUNTDOWN LOGIC ---
+
+        // Set the target date and time.
+        // new Date() parses the ISO 8601 string correctly.
+        // "2025-11-01T17:20:00+02:00" is November 1, 2025, at 5:20 PM in EET (UTC+2),
+        // which is Beirut's time zone in November.
+        const targetDate = new Date("2025-11-01T17:20:00+02:00").getTime();
+
+        // Get DOM elements
+        const daysEl = document.getElementById('days');
+        const hoursEl = document.getElementById('hours');
+        const minutesEl = document.getElementById('minutes');
+        const secondsEl = document.getElementById('seconds');
+        
+        const countdownWrapper = document.getElementById('countdown-wrapper');
+        const landedMessage = document.getElementById('landed-message');
+        const footerMessage = document.getElementById('footer-message');
+
+        // Helper function to format numbers with a leading zero
+        function formatTime(time) {
+            return time < 10 ? `0${time}` : time;
+        }
+
+        // Update the countdown every second
+        const interval = setInterval(() => {
+            // Get the current time
+            const now = new Date().getTime();
+            
+            // Calculate the difference
+            const distance = targetDate - now;
+
+            // If the countdown is over
+            if (distance <= 0) {
+                clearInterval(interval);
+                
+                // Hide the countdown
+                if (countdownWrapper) {
+                    countdownWrapper.classList.add('hidden');
+                }
+                
+                // Show the "Landed" message
+                if (landedMessage) {
+                    landedMessage.classList.remove('hidden');
+                }
+                
+                // Update footer message
+                if (footerMessage) {
+                    footerMessage.textContent = "So happy you're here. ❤️";
+                }
+                
+                return; // Stop the function
+            }
+
+            // Time calculations
+            const days = Math.floor(distance / (1000 * 60 * 60 * 24));
+            const hours = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+            const minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
+            const seconds = Math.floor((distance % (1000 * 60)) / 1000);
+
+            // Update the HTML
+            if (daysEl) daysEl.innerText = formatTime(days);
+            if (hoursEl) hoursEl.innerText = formatTime(hours);
+            if (minutesEl) minutesEl.innerText = formatTime(minutes);
+            if (secondsEl) secondsEl.innerText = formatTime(seconds);
+
+        }, 1000);
+
+        // --- FLOATING ELEMENTS LOGIC ---
+
+        const emojis = ['❤️', '✈️']; 
+        const body = document.body;
+
+        function createFloatingElement() {
+            const emoji = emojis[Math.floor(Math.random() * emojis.length)];
+            const span = document.createElement('span');
+            span.innerHTML = emoji;
+            span.classList.add('floating-item');
+
+            if (emoji === '❤️') {
+                span.classList.add('floating-heart');
+            } else {
+                span.classList.add('floating-plane');
+            }
+
+            // Randomize START position all over the screen
+            span.style.left = `${Math.random() * 100}vw`;
+            span.style.top = `${Math.random() * 100}vh`;
+
+            // Randomize animation duration, delay, and size
+            span.style.animationDuration = `${Math.random() * 8 + 5}s`; // 5 to 13 seconds
+            span.style.animationDelay = `${Math.random() * 0.5}s`; // Staggered start
+            span.style.fontSize = `${Math.random() * 1.5 + 1.5}em`; // 1.5em to 3em
+
+            // Randomize END transform (where it drifts to)
+            const xEnd = (Math.random() - 0.5) * 300; // -150px to +150px horizontal drift
+            const yEnd = (Math.random() - 0.5) * 300; // -150px to +150px vertical drift
+            span.style.setProperty('--x-end', `${xEnd}px`);
+            span.style.setProperty('--y-end', `${yEnd}px`);
+
+            body.appendChild(span);
+
+            // Remove element after it floats up to prevent DOM bloat
+            span.addEventListener('animationend', () => {
+                span.remove();
+            });
+        }
+
+        // Generate a new floating element every 500ms
+        setInterval(createFloatingElement, 500);
+        
+    </script>
+
+</body>
+</html>
+
+
+
+
